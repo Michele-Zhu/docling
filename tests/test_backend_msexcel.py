@@ -312,3 +312,34 @@ def test_bytesio_stream():
     assert doc.pages.get(2).size.as_tuple() == (9.0, 18.0)
     assert doc.pages.get(3).size.as_tuple() == (13.0, 36.0)
     assert doc.pages.get(4).size.as_tuple() == (0.0, 0.0)
+
+
+def test_table_with_missing_header_tail():
+    """
+    Docstring for test_table_with_missing_header_tail
+    """
+    # Get a test Excel file
+    path = next(
+        item
+        for item in get_excel_paths()
+        if item.stem == "xlsx_06_table_with_missing_headers_tail"
+    )
+
+    converter = get_converter()
+
+    conv_result: ConversionResult = converter.convert(path)
+    doc: DoclingDocument = conv_result.document
+
+    # With merge_headless_columns_in_pages=True, the two tables should be merged into one
+    tables = list(doc.tables)
+
+    assert len(tables) == 1, f"Should have 1 table, got {len(tables)}"
+
+    # Verify the table dimensions
+    table = tables[0]
+    assert table.data.num_rows == 4, (
+        f"Table should have 4 rows, got {table.data.num_rows}"
+    )
+    assert table.data.num_cols == 6, (
+        f"Table should have 6 cols, got {table.data.num_cols}"
+    )
